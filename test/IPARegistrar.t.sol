@@ -31,7 +31,7 @@ contract IPARegistrarTest is Test {
         spgNft = ISPGNFT(ipaRegistrar.SPG_NFT());
 
         vm.label(address(ipAssetRegistry), "IPAssetRegistry");
-        vm.label(address(twoPMnft), "SimpleNFT");
+        vm.label(address(twoPMnft), "2PMNFT");
         vm.label(address(spgNft), "SPGNFT");
         vm.label(address(0x000000006551c19487814612e58FE06813775758), "ERC6551Registry");
     }
