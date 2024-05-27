@@ -20,11 +20,6 @@ contract TwoPMDAO {
         _;
     }
 
-    modifier onlyNotInitialized() {
-        require(!initialized, "DAO is already initialized");
-        _;
-    }
-
     constructor(
         address ipAssetRegistryAddr,
         address licensingModuleAddr,
@@ -32,14 +27,14 @@ contract TwoPMDAO {
         address royaltyTokenAddr
     ) {
         TWO_PM_NFT = new TwoPMNFT("2PM IP NFT", "2PM");
-        IPA_LICENSE_TOKEN = new IPALicenseToken(ipAssetRegistryAddr, licensingModuleAddr, pilTemplateAddr);
+        IPA_LICENSE_TOKEN = new IPALicenseToken(
+            ipAssetRegistryAddr,
+            licensingModuleAddr,
+            pilTemplateAddr
+        );
         ROYALTY_TOKEN = IMockERC20(royaltyTokenAddr);
         initialized = false;
         owner = msg.sender;
-    }
-
-    function initialize() external onlyNotInitialized onlyOwner {
-        initialized = true;
         IPA_LICENSE_TOKEN.mintLicenseToken(1, address(this));
         ROYALTY_TOKEN.mint(address(this), 100000000);
     }
@@ -56,5 +51,9 @@ contract TwoPMDAO {
         for (uint256 i = 0; i < nodeList.length; i++) {
             ROYALTY_TOKEN.transfer(nodeList[i], 100000);
         }
+    }
+
+    function switchOwner(address newOwner) external onlyOwner {
+        owner = newOwner;
     }
 }
