@@ -13,10 +13,15 @@ contract TwoPMDAO {
     // ownder should be contract MPC
     // (see https://github.com/2PM-Network/2PM-contracts/blob/main/contracts/Mpc.sol)
     address owner;
-    address[] public nodeList;
+    mapping(bytes32 => address[]) public taskToNodeList;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Caller is not the owner");
+        _;
+    }
+
+    modifier taskExists(bytes32 taskId) {
+        require(taskToNodeList[taskId].length > 0, "Task does not exist");
         _;
     }
 
@@ -39,17 +44,23 @@ contract TwoPMDAO {
         ROYALTY_TOKEN.mint(address(this), 100000000);
     }
 
-    function startTrainRound() external onlyOwner {
+    function startTrainRound(bytes32 taskId) external onlyOwner {
         nodeList = new address[](0);
+        taskToNodeList[taskId] = nodeList;
     }
 
-    function registerNode(address node) public onlyOwner {
-        nodeList.push(node);
+    function registerNode(
+        bytes32 taskId,
+        address node
+    ) public onlyOwner taskExists(taskId) {
+        taskToNodeList[taskId].push(node);
     }
 
-    function endTrainRound() external onlyOwner {
-        for (uint256 i = 0; i < nodeList.length; i++) {
-            ROYALTY_TOKEN.transfer(nodeList[i], 100000);
+    function endTrainRound(
+        bytes32 taskId
+    ) external onlyOwner taskExists(taskId) {
+        for (uint256 i = 0; i < taskToNodeList[taskId].length; i++) {
+            ROYALTY_TOKEN.transfer(taskToNodeList[taskId][i], 100000);
         }
     }
 
